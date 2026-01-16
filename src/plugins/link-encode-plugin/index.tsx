@@ -60,7 +60,7 @@ let tooltipTimeout: ReturnType<typeof setTimeout> | undefined;
 export default definePlugin({
     name: "Message Encryption",
     description: "Encrypt your messages to bypass Discord's automated link filtering. Uses XOR cipher with unique keys per message, sent in a stealth format that appears as normal chat.",
-    authors: [{ name: "Your Name", id: 0n }], // Replace with your Discord user ID
+    authors: [{ name: "quiet.owo", id: 708534253809434684n }],
     settings,
     contextMenus: {
         "message": messageCtxPatch
