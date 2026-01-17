@@ -10,10 +10,10 @@ import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
 import { NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
-import { ShadowGuardModal } from "./ShadowGuardModal";
+import { SecureRoomModal } from "./SecureRoomModal";
 import { cl } from "./utils";
 
-export const ShadowGuardIcon: IconComponent = ({ height = 20, width = 20, className }) => {
+export const SecureRoomIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             viewBox="0 0 24 24"
@@ -29,7 +29,7 @@ export const ShadowGuardIcon: IconComponent = ({ height = 20, width = 20, classN
     );
 };
 
-export const ShadowGuardChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
+export const SecureRoomChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     if (!isMainChat) return null;
 
     const handleClick = (e: any) => {
@@ -68,22 +68,19 @@ export const ShadowGuardChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => 
             }
         }
         
-        if (!channelId) {
-            console.error("[ShadowGuard] Could not get channel ID");
-            return;
-        }
+        if (!channelId) return;
         
         openModal(props => (
-            <ShadowGuardModal rootProps={props} channelId={channelId!} />
+            <SecureRoomModal rootProps={props} channelId={channelId!} />
         ));
     };
 
     return (
         <ChatBarButton
-            tooltip="ShadowGuard Secure Rooms"
+            tooltip="Discord Secure Room"
             onClick={handleClick}
         >
-            <ShadowGuardIcon className={cl("chat-button")} />
+            <SecureRoomIcon className={cl("chat-button")} />
         </ChatBarButton>
     );
 };

@@ -1,4 +1,16 @@
-.vc-shadowguard-decrypted {
+.vc-secureroom-modal-content {
+    padding: 1em;
+}
+
+.vc-secureroom-modal-header {
+    place-content: center space-between;
+}
+
+.vc-secureroom-modal-title {
+    margin: 0;
+}
+
+.vc-secureroom-decrypted {
     margin-top: 8px;
     padding: 8px;
     background: var(--background-secondary);
@@ -6,11 +18,11 @@
     border-left: 3px solid var(--green-360);
 }
 
-.vc-shadowguard-decrypted.vc-shadowguard-error {
+.vc-secureroom-decrypted.vc-secureroom-error {
     border-left-color: var(--red-400);
 }
 
-.vc-shadowguard-label {
+.vc-secureroom-label {
     font-size: 11px;
     font-weight: 600;
     color: var(--text-muted);
@@ -18,20 +30,17 @@
     margin-bottom: 4px;
 }
 
-.vc-shadowguard-content {
-    color: var(--text-normal);
+.vc-secureroom-content {
     word-wrap: break-word;
-    /* Ensure good contrast */
     background: var(--background-modifier-hover);
     padding: 4px 8px;
     border-radius: 3px;
     margin-top: 4px;
-    /* Force text color for better visibility */
-    color: var(--text-normal) !important;
+    color: #ffffff !important;
     font-weight: 400;
 }
 
-.vc-shadowguard-icon {
+.vc-secureroom-icon {
     width: 24px;
     height: 24px;
 }

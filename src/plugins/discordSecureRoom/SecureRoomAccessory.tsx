@@ -10,11 +10,11 @@ import { Message } from "@vencord/discord-types";
 import { decryptMessage } from "./crypto";
 import { getActiveRoomKey, onSessionChange } from "./session";
 
-interface ShadowGuardAccessoryProps {
+interface SecureRoomAccessoryProps {
     message: Message;
 }
 
-export function ShadowGuardAccessory({ message }: ShadowGuardAccessoryProps) {
+export function SecureRoomAccessory({ message }: SecureRoomAccessoryProps) {
     const [decrypted, setDecrypted] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [forceUpdate, setForceUpdate] = useState(0);
@@ -25,12 +25,9 @@ export function ShadowGuardAccessory({ message }: ShadowGuardAccessoryProps) {
         channelIdRef.current = String(message.channel_id);
     }, [message.channel_id]);
 
-    // Listen for session changes
     useEffect(() => {
         const unsubscribe = onSessionChange((channelId) => {
-            // If session was set for this channel, trigger re-decryption
             if (channelId === channelIdRef.current) {
-                console.log("[ShadowGuard] Session available for channel, triggering re-decryption");
                 setForceUpdate(prev => prev + 1);
             }
         });
@@ -45,61 +42,60 @@ export function ShadowGuardAccessory({ message }: ShadowGuardAccessoryProps) {
             return;
         }
 
-        const channelId = channelIdRef.current;
-        const roomKey = getActiveRoomKey(channelId);
-        
-        if (!roomKey) {
-            // No room key available yet
+        const messageTimestamp = message.timestamp ? new Date(message.timestamp).getTime() : Date.now();
+        if ((Date.now() - messageTimestamp) / (1000 * 60) > 60) {
             setDecrypted(null);
             setError(null);
             return;
         }
 
-        // Auto-decrypt for members
-        const encrypted = content.replace("[SECURE-MSG]", "").trim();
-        
-        // Reset states before decrypting
+        const roomKey = getActiveRoomKey(channelIdRef.current);
+        if (!roomKey) {
+            setDecrypted(null);
+            setError(null);
+            return;
+        }
+
         setError(null);
         setDecrypted(null);
         
-        decryptMessage(encrypted, roomKey)
-            .then(dec => {
-                setDecrypted(dec);
-                setError(null);
-            })
+        decryptMessage(content.replace("[SECURE-MSG]", "").trim(), roomKey)
+            .then(setDecrypted)
             .catch(err => {
-                console.error("[ShadowGuard] Decryption failed:", err);
+                console.error("[Discord Secure Room] Decryption failed:", err);
                 setError("Decryption failed");
-                setDecrypted(null);
             });
-    }, [message.content, message.channel_id, forceUpdate]);
+    }, [message.content, message.channel_id, message.timestamp, forceUpdate]);
 
     if (!message.content?.startsWith("[SECURE-MSG]")) return null;
     
+    const messageTimestamp = message.timestamp ? new Date(message.timestamp).getTime() : Date.now();
+    if ((Date.now() - messageTimestamp) / (1000 * 60) > 60) return null;
+    
     const roomKey = getActiveRoomKey(message.channel_id);
-    if (!roomKey) return null; // Non-member
+    if (!roomKey) return null;
 
     if (error) {
         return (
-            <div className="vc-shadowguard-decrypted vc-shadowguard-error">
-                <div className="vc-shadowguard-label">Error:</div>
-                <div className="vc-shadowguard-content">{error}</div>
+            <div className="vc-secureroom-decrypted vc-secureroom-error">
+                <div className="vc-secureroom-label">Error:</div>
+                <div className="vc-secureroom-content">{error}</div>
             </div>
         );
     }
 
     if (!decrypted) {
         return (
-            <div className="vc-shadowguard-decrypted">
-                <div className="vc-shadowguard-label">Decrypting...</div>
+            <div className="vc-secureroom-decrypted">
+                <div className="vc-secureroom-label">Decrypting...</div>
             </div>
         );
     }
 
     return (
-        <div className="vc-shadowguard-decrypted">
-            <div className="vc-shadowguard-label">Decrypted:</div>
-            <div className="vc-shadowguard-content">{decrypted}</div>
+        <div className="vc-secureroom-decrypted">
+            <div className="vc-secureroom-label">Decrypted:</div>
+            <div className="vc-secureroom-content">{decrypted}</div>
         </div>
     );
 }

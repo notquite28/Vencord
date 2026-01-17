@@ -11,7 +11,21 @@ import { settings } from "./settings";
 import { generateRoomKey, encryptRoomKey, decryptRoomKey } from "./crypto";
 import { setActiveSession } from "./session";
 
-const Native = VencordNative.pluginHelpers.ShadowGuard as PluginNative<typeof import("./native")>;
+// Try multiple possible helper names
+const getNative = () => {
+    const helpers = VencordNative.pluginHelpers;
+    // Try different possible names
+    return helpers.DiscordSecureRoom || 
+           helpers.discordSecureRoom || 
+           helpers["Discord Secure Room"] ||
+           helpers["discordSecureRoom"];
+};
+
+const Native = getNative() as PluginNative<typeof import("./native")>;
+
+if (!Native) {
+    console.error("[Discord Secure Room] Native helper not found. Available helpers:", Object.keys(VencordNative.pluginHelpers));
+}
 
 /**
  * Generate a random 8-character room code
@@ -46,6 +60,11 @@ export async function createRoom(channelId: string, passphrase: string): Promise
         const roomCode = generateRoomCode();
         
         // POST to worker via native IPC (bypasses CSP)
+        if (!Native || !Native.makeWorkerRequest) {
+            const available = Object.keys(VencordNative.pluginHelpers);
+            throw new Error(`Native helper not available. Available helpers: ${available.join(", ")}. Plugin may need to be reloaded.`);
+        }
+        
         const url = `${workerUrl.replace(/\/$/, "")}/room`; // Remove trailing slash
         const { status, data } = await Native.makeWorkerRequest(
             url,
@@ -77,7 +96,7 @@ export async function createRoom(channelId: string, passphrase: string): Promise
         }
         
     } catch (error) {
-        console.error("[ShadowGuard] Create room failed:", error);
+            console.error("[Discord Secure Room] Create room failed:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         
         if (errorMessage.includes("libsodium") || errorMessage.includes("sodium")) {
@@ -102,6 +121,11 @@ export async function joinRoom(channelId: string, roomCode: string, passphrase: 
         }
 
         // GET encrypted blob from worker via native IPC (bypasses CSP)
+        if (!Native || !Native.makeWorkerRequest) {
+            const available = Object.keys(VencordNative.pluginHelpers);
+            throw new Error(`Native helper not available. Available helpers: ${available.join(", ")}. Plugin may need to be reloaded.`);
+        }
+        
         const url = `${workerUrl.replace(/\/$/, "")}/room/${roomCode}`; // Remove trailing slash
         const { status, data } = await Native.makeWorkerRequest(url, "GET");
         
@@ -127,7 +151,7 @@ export async function joinRoom(channelId: string, roomCode: string, passphrase: 
         showToast("Successfully joined secure room!", Toasts.Type.SUCCESS);
         
     } catch (error) {
-        console.error("[ShadowGuard] Join room failed:", error);
+            console.error("[Discord Secure Room] Join room failed:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         
         if (errorMessage.includes("libsodium") || errorMessage.includes("sodium")) {

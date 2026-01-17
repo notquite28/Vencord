@@ -6,4 +6,4 @@
 
 import { classNameFactory } from "@utils/css";
 
-export const cl = classNameFactory("vc-shadowguard-");
+export const cl = classNameFactory("vc-secureroom-");

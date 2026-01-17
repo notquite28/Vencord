@@ -1,4 +1,4 @@
-# ShadowGuard Cloudflare Worker
+# Discord Secure Room Cloudflare Worker
 
 Serverless backend for ephemeral encrypted room key storage.
 
@@ -62,10 +62,10 @@ pnpm deploy:preview
 
 After deployment, Wrangler will output your worker URL:
 ```
-https://shadowguard-worker.your-subdomain.workers.dev
+https://discord-secure-room-worker.your-subdomain.workers.dev
 ```
 
-Copy this URL and configure it in the ShadowGuard plugin settings.
+Copy this URL and configure it in the Discord Secure Room plugin settings.
 
 ## Development
 

@@ -62,13 +62,13 @@ pnpm deploy
 
 After deployment, you'll see output like:
 ```
-✨  Deployed to https://shadowguard-worker.your-username.workers.dev
+✨  Deployed to https://discord-secure-room-worker.your-username.workers.dev
 ```
 
 ### 8. Configure Plugin
 
 1. Copy the worker URL from step 7
-2. Open Vencord Settings → Plugins → ShadowGuard
+2. Open Vencord Settings → Plugins → Discord Secure Room
 3. Paste the URL in "Worker URL" field
 4. Save settings
 

@@ -1,7 +1,7 @@
 {
-  "name": "shadowguard-worker",
+  "name": "discord-secure-room-worker",
   "version": "1.0.0",
-  "description": "Cloudflare Worker for ShadowGuard key exchange",
+  "description": "Cloudflare Worker for Discord Secure Room key exchange",
   "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",

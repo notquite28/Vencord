@@ -23,12 +23,8 @@ export function onSessionChange(callback: (channelId: string) => void): () => vo
  * Store active room key for a channel
  */
 export function setActiveSession(channelId: string, roomKey: Uint8Array): void {
-    // Ensure channelId is a string
     const key = String(channelId);
     activeSessions.set(key, roomKey);
-    console.log("[ShadowGuard] Session stored for channel:", key, "Total sessions:", activeSessions.size);
-    
-    // Notify all listeners
     sessionListeners.forEach(listener => listener(key));
 }
 
@@ -36,27 +32,23 @@ export function setActiveSession(channelId: string, roomKey: Uint8Array): void {
  * Get active room key for a channel
  */
 export function getActiveRoomKey(channelId: string): Uint8Array | undefined {
-    // Ensure channelId is a string
-    const key = String(channelId);
-    const roomKey = activeSessions.get(key);
-    console.log("[ShadowGuard] getActiveRoomKey - channelId:", key, "found:", !!roomKey);
-    return roomKey;
+    return activeSessions.get(String(channelId));
 }
 
 /**
  * Check if channel has active secure session
  */
 export function hasActiveSession(channelId: string): boolean {
-    // Ensure channelId is a string
-    const key = String(channelId);
-    return activeSessions.has(key);
+    return activeSessions.has(String(channelId));
 }
 
 /**
  * Clear session for a channel
  */
 export function clearSession(channelId: string): void {
-    activeSessions.delete(channelId);
+    const key = String(channelId);
+    activeSessions.delete(key);
+    sessionListeners.forEach(listener => listener(key));
 }
 
 /**

@@ -11,18 +11,20 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } fr
 import { Button, Forms, TextInput } from "@webpack/common";
 
 import { createRoom, joinRoom } from "./roomManager";
+import { hasActiveSession, clearSession } from "./session";
 import { cl } from "./utils";
 
-interface ShadowGuardModalProps {
+interface SecureRoomModalProps {
     rootProps: ModalProps;
     channelId: string;
 }
 
-export function ShadowGuardModal({ rootProps, channelId }: ShadowGuardModalProps) {
+export function SecureRoomModal({ rootProps, channelId }: SecureRoomModalProps) {
     const [mode, setMode] = useState<"create" | "join">("create");
     const [passphrase, setPassphrase] = useState("");
     const [roomCode, setRoomCode] = useState("");
     const [loading, setLoading] = useState(false);
+    const hasSession = hasActiveSession(channelId);
 
     const handleCreate = async () => {
         if (!passphrase.trim()) {
@@ -35,7 +37,7 @@ export function ShadowGuardModal({ rootProps, channelId }: ShadowGuardModalProps
             await createRoom(channelId, passphrase);
             rootProps.onClose();
         } catch (error) {
-            console.error("[ShadowGuard] Create failed:", error);
+            console.error("[Discord Secure Room] Create failed:", error);
         } finally {
             setLoading(false);
         }
@@ -52,17 +54,22 @@ export function ShadowGuardModal({ rootProps, channelId }: ShadowGuardModalProps
             await joinRoom(channelId, roomCode.trim().toUpperCase(), passphrase);
             rootProps.onClose();
         } catch (error) {
-            console.error("[ShadowGuard] Join failed:", error);
+            console.error("[Discord Secure Room] Join failed:", error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleExit = () => {
+        clearSession(channelId);
+        rootProps.onClose();
     };
 
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
                 <Forms.FormTitle tag="h2" className={cl("modal-title")}>
-                    ShadowGuard Secure Room
+                    Discord Secure Room
                 </Forms.FormTitle>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
@@ -73,87 +80,118 @@ export function ShadowGuardModal({ rootProps, channelId }: ShadowGuardModalProps
                     Messages in active rooms are automatically encrypted/decrypted.
                 </Forms.FormText>
 
-                <Divider className={Margins.bottom16} />
+                {hasSession && (
+                    <>
+                        <Divider className={Margins.bottom16} />
+                        <Forms.FormText className={Margins.bottom16} style={{ color: "var(--green-360)" }}>
+                            ✓ You are in an active secure room. Messages will be encrypted automatically.
+                        </Forms.FormText>
+                        <Button
+                            onClick={handleExit}
+                            color={Button.Colors.RED}
+                            className={Margins.bottom16}
+                            style={{ width: "100%" }}
+                        >
+                            Exit Room (Send Unencrypted)
+                        </Button>
+                        <Divider className={Margins.bottom16} />
+                    </>
+                )}
 
-                {/* Mode Toggle */}
-                <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
                     <Button
                         color={mode === "create" ? Button.Colors.BRAND : Button.Colors.PRIMARY}
-                        onClick={() => setMode("create")}
+                        onClick={() => {
+                            setMode("create");
+                            setPassphrase("");
+                            setRoomCode("");
+                        }}
                         style={{ flex: 1 }}
+                        disabled={loading}
                     >
                         Create Room
                     </Button>
                     <Button
                         color={mode === "join" ? Button.Colors.BRAND : Button.Colors.PRIMARY}
-                        onClick={() => setMode("join")}
+                        onClick={() => {
+                            setMode("join");
+                            setPassphrase("");
+                            setRoomCode("");
+                        }}
                         style={{ flex: 1 }}
+                        disabled={loading}
                     >
                         Join Room
                     </Button>
                 </div>
 
                 {mode === "create" ? (
-                    <div>
+                    <>
                         <Forms.FormTitle tag="h3" style={{ marginBottom: "8px" }}>
                             Create Secure Room
                         </Forms.FormTitle>
-                        <Forms.FormText style={{ marginBottom: "16px" }}>
+                        <Forms.FormText className={Margins.bottom16}>
                             Enter a passphrase to protect your room. Share this passphrase securely with others who want to join.
                         </Forms.FormText>
 
-                        <TextInput
-                            type="password"
-                            placeholder="Enter room passphrase"
-                            value={passphrase}
-                            onChange={setPassphrase}
-                            disabled={loading}
-                            style={{ marginBottom: "16px" }}
-                        />
+                        <div className={Margins.bottom16}>
+                            <TextInput
+                                type="password"
+                                placeholder="Enter room passphrase"
+                                value={passphrase}
+                                onChange={setPassphrase}
+                                disabled={loading}
+                            />
+                        </div>
 
                         <Button
                             onClick={handleCreate}
                             disabled={loading || !passphrase.trim()}
                             color={Button.Colors.BRAND}
+                            style={{ width: "100%" }}
                         >
                             {loading ? "Creating..." : "Create Room"}
                         </Button>
-                    </div>
+                    </>
                 ) : (
-                    <div>
+                    <>
                         <Forms.FormTitle tag="h3" style={{ marginBottom: "8px" }}>
                             Join Secure Room
                         </Forms.FormTitle>
-                        <Forms.FormText style={{ marginBottom: "16px" }}>
+                        <Forms.FormText className={Margins.bottom16}>
                             Enter the room code and passphrase you received from the room creator.
                         </Forms.FormText>
 
-                        <TextInput
-                            placeholder="Room code (e.g., ABC12345)"
-                            value={roomCode}
-                            onChange={setRoomCode}
-                            disabled={loading}
-                            style={{ marginBottom: "12px", textTransform: "uppercase" }}
-                            maxLength={12}
-                        />
+                        <div style={{ marginBottom: "12px" }}>
+                            <TextInput
+                                placeholder="Room code (e.g., ABC12345)"
+                                value={roomCode}
+                                onChange={setRoomCode}
+                                disabled={loading}
+                                style={{ textTransform: "uppercase" }}
+                                maxLength={12}
+                            />
+                        </div>
 
-                        <TextInput
-                            type="password"
-                            placeholder="Enter room passphrase"
-                            value={passphrase}
-                            onChange={setPassphrase}
-                            disabled={loading}
-                            style={{ marginBottom: "16px" }}
-                        />
+                        <div className={Margins.bottom16}>
+                            <TextInput
+                                type="password"
+                                placeholder="Enter room passphrase"
+                                value={passphrase}
+                                onChange={setPassphrase}
+                                disabled={loading}
+                            />
+                        </div>
 
                         <Button
                             onClick={handleJoin}
                             disabled={loading || !roomCode.trim() || !passphrase.trim()}
                             color={Button.Colors.BRAND}
+                            style={{ width: "100%" }}
                         >
                             {loading ? "Joining..." : "Join Room"}
                         </Button>
-                    </div>
+                    </>
                 )}
             </ModalContent>
         </ModalRoot>

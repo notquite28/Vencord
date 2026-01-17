@@ -1,4 +1,4 @@
-name = "shadowguard-worker"
+name = "discord-secure-room-worker"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
 
@@ -8,7 +8,7 @@ id = "b525751aa05c41388c84a2a704e7d8f9"
 preview_id = "6febce7930ff4ba78400ddedf31e7ed1"
 
 [env.production]
-name = "shadowguard-worker"
+name = "discord-secure-room-worker"
 
 [env.preview]
-name = "shadowguard-worker-preview"
+name = "discord-secure-room-worker-preview"

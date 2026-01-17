@@ -1,5 +1,5 @@
 /**
- * ShadowGuard Cloudflare Worker
+ * Discord Secure Room Cloudflare Worker
  * Handles ephemeral storage of encrypted room keys
  */
 
