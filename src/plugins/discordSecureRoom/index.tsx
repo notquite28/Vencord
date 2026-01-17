@@ -9,6 +9,7 @@ import "./styles.css";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { Devs } from "@utils/constants";
 
 import { settings } from "./settings";
 import { SecureRoomIcon, SecureRoomChatBarIcon } from "./SecureRoomIcon";
@@ -19,7 +20,7 @@ import { getActiveRoomKey, hasActiveSession } from "./session";
 export default definePlugin({
     name: "Discord Secure Room",
     description: "Ephemeral, end-to-end encrypted sub-rooms within Discord channels",
-    authors: [{ name: "quiet", id: 0n }],
+    authors: [Devs.quiet],
     settings,
 
     chatBarButton: {
